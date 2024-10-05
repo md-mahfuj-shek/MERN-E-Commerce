@@ -2,9 +2,20 @@ const express = require('express');
 const morgan = require('morgan')
 const bodyParser = require('body-parser');
 const createError = require('http-errors')
+const xssClean = require('xss-clean')
+const ratelimit = require('express-rate-limit')
+
 const app = express();
 
-app.use(morgan('dev'))
+const rateLimiter = ratelimit({
+    windowMs: 1 * 60 * 1000,
+    max: 5,
+    message: 'Too many requests from this IP. Please try again later',
+});
+
+app.use(rateLimiter);
+app.use(xssClean());
+app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
  
